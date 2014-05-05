@@ -439,7 +439,11 @@ public class Database extends SQLiteOpenHelper {
 	}
 	
 	
-	// get some info about the movie
+	/**
+	 * This fills in some information about the movie (only quick access movie data)
+	 * @param movie the movie whose data to extract
+	 * @return an object holding the data
+	 */
 	public MovieQuickData getMovieQuickData( Movie movie ){
 		SQLiteDatabase db = this.getReadableDatabase();
 		// execute a statement in the database
@@ -454,12 +458,25 @@ public class Database extends SQLiteOpenHelper {
 		if(cur.getCount() < 1){
 			return null;
 		}
+		String title = cur.getString(0);
+		String director = cur.getString(1);
+		int year = cur.getInt(2);
+		
+		// get the interest 
+		Interest interest = Interest.NOINTEREST;
+		cur = db.rawQuery("SELECT "+INTEREST_INTEREST+" FROM "+TABLE_INTEREST+
+				" WHERE "+ TABLE_MOVIES + "= ?", new String[] {movie.getID()});
+		if(cur.getCount() > 0){
+			cur.moveToFirst();
+			interest = Interest.values()[ cur.getInt(0) ];
+		}
 		// otherwise, build value
 		cur.moveToFirst();
 		MovieQuickData result =  new MovieQuickData(
-									cur.getString(0),
-									cur.getString(1),
-									cur.getInt(2)
+									title,
+									director,
+									year,
+									interest
 								);
 		return result;
 	}

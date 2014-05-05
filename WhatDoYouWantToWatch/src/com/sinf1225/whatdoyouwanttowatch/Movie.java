@@ -70,7 +70,7 @@ public class Movie {
 		
 		// also, add quick data...
 		if(quickData == null){
-			quickData = new MovieQuickData(title, director, year);
+			quickData = new MovieQuickData(title, director, year, InterestForUser);
 		}
 	}
 
