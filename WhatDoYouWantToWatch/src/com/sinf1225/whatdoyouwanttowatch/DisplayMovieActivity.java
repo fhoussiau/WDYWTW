@@ -20,9 +20,9 @@ import android.widget.TextView;
 public class DisplayMovieActivity extends ActionBarActivity {
 
 	public static final String MOVIE_MESSAGE = "com.sinf1225.wdywtw.movie.message";
-	public static final int MAX_CAST = 5;
-	public static final int MAX_AWARDS = 5;
-	public static final int MAX_GENRE = 5;
+	public static final int MAX_CAST = 10;
+	public static final int MAX_AWARDS = 10;
+	public static final int MAX_GENRE = 10;
 	
 	// movie to display
 	private Movie movie;
@@ -33,7 +33,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_display_movie);
-		// essentiel for user secutiry: garantee a user is logged in
+		// essential for user security: guarantee a user is logged in
 		Application.checkLogin(this);
 		// populate
 		current = this;
@@ -85,7 +85,9 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		TextView interest_tv = (TextView) findViewById(R.id.textview_interest);
 		interest_tv.setText(movie.InterestForUser.toString());
 		interest_tv.setTextColor(movie.InterestForUser.toColor());
+		
 		// then, populate awards and cast from lists
+		// TODO: SWITCH TO LISTVIEWS
 		if(movie.Awards != null){
 			// programmatically add widgets
 			LinearLayout awardsLayout = (LinearLayout) findViewById(R.id.awards_container);
@@ -163,6 +165,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 	public void setMovieInterest(int i){
 		Database db = new Database( this );
 		db.setMovieInterest(this.movie, i);
+		db.close();
 		// update movie object
 		Interest it = Interest.values()[i];
 		this.movie.InterestForUser = it;
@@ -200,6 +203,10 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		}
 		if(id == R.id.action_back){
 			Application.goHome(this);
+			return true;
+		}
+		if(id == R.id.action_logout){
+			Application.fullLogoutDialog(this);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

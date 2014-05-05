@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,9 +28,6 @@ public class DiscoverMoviesActivity extends ActionBarActivity {
 		MostWatched = db.getMostWatched(N_MOVIES_PER_CATEGORY);
 		PlayingNow  = db.getPlayingNow(N_MOVIES_PER_CATEGORY);
 		ComingSoon  = db.getComingSoon(N_MOVIES_PER_CATEGORY);
-		for(Movie m: MostWatched){
-			Log.d("YEK YEK YEK", m.getQuickData(this).title);
-		}
 		
 		ListView lv_mostwatched = (ListView) findViewById(R.id.container_mostwatched);
 		
@@ -103,6 +99,10 @@ public class DiscoverMoviesActivity extends ActionBarActivity {
 		}
 		if(id == R.id.action_back){
 			Application.goHome(this);
+			return true;
+		}
+		if(id == R.id.action_logout){
+			Application.fullLogoutDialog(this);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

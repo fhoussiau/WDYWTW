@@ -1,15 +1,15 @@
 package com.sinf1225.whatdoyouwanttowatch;
 
 // enum containing the different values for interest
+// the order of the interests is such that i1 < i2 ==> i2 is better than i1
 public enum Interest {
+	HATED,
+	NOTLIKED,
+	INDIFFERENT,
 	NOINTEREST, // this is the default: the user never specified anything for this movie
 	NOTWATCHED, // the user has acknowledged never seeing this movie, but it not very interested by it
 	WILLNOTWATCHIT, // the user has never seen this movie, and doesn't want to (i. e. Twilight)
 	WANTTOWATCHIT, // the user wants to watch this movie, and hasn't yet
-	// beyond this point, the user has watched the movie
-	HATED,
-	NOTLIKED,
-	INDIFFERENT,
 	LIKED,
 	LOVED,
 	FAVORITE;

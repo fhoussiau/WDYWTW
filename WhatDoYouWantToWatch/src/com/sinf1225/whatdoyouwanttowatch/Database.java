@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 
 public class Database extends SQLiteOpenHelper {
@@ -489,10 +488,23 @@ public class Database extends SQLiteOpenHelper {
 	 * @param movie: the movie to change
 	 */
 	public void setMovieInterest(Movie movie, int i){
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.execSQL("UPDATE "+TABLE_INTEREST+" SET "+INTEREST_INTEREST+
-				" = "+Integer.toString(i)+" WHERE "+INTEREST_MOVIE+
-				" = \""+movie.getID()+"\";");
+		// there is a trick here: we can use update ONLY if an interest was set before...
+		// therefore, we have to check if the movie has an interest set
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cur = db.rawQuery("SELECT 1 FROM "+TABLE_INTEREST+" WHERE "+INTEREST_MOVIE+" = ?", new String[]{movie.getID()});
+		boolean alreadyExists = cur.getCount() >0;
+		db.close();
+		SQLiteDatabase dbw = this.getWritableDatabase();
+		if(alreadyExists){
+			dbw.execSQL("UPDATE "+TABLE_INTEREST+" SET "+INTEREST_INTEREST+
+					" = ? WHERE " +INTEREST_MOVIE+ " = ?;",
+					new String[] {Integer.toString(i), movie.getID()});
+		}
+		else{
+			dbw.execSQL("INSERT INTO "+TABLE_INTEREST+" VALUES (?,?)",
+					new String[] {movie.getID(), Application.getUser().getName(), Integer.toString(i)} );
+		}
+		dbw.close();
 	}
 
 	 
@@ -558,7 +570,6 @@ public class Database extends SQLiteOpenHelper {
 		// add movies found to value
 		cur.moveToFirst(); iter =0;
 		while(!cur.isAfterLast() && iter<MAX_DIRECTOR_MATCH) {
-			Log.d("YEK YEK YEK", cur.getString(0));
 			Movie mov = Application.getMovie(cur.getString(0));
 			mov.getQuickData(this);
 			result.add(mov);

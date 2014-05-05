@@ -39,6 +39,9 @@ public class MainMenuActivity extends Activity {
 		case R.id.action_settings:
 			openSettings();
 			return true;
+		case R.id.action_logout:
+			Application.fullLogoutDialog(this);
+			return true;
 		}
 		return true;
 	}

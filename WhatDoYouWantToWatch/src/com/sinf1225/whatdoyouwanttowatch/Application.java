@@ -4,8 +4,10 @@ package com.sinf1225.whatdoyouwanttowatch;
 import java.util.Hashtable;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.app.DialogFragment;
 
 /**
  * Application
@@ -108,6 +110,26 @@ public class Application {
 	public static void goHome( Context origin ){
 		Intent intent = new Intent(origin, MainMenuActivity.class);
 		origin.startActivity(intent);
+	}
+	
+	/**
+	 * Fully log out of the application, and send the user back to the login page
+	 * @param origin: the page to navigate from
+	 */
+	public static void fullLogout( Context origin ){
+		logout();
+		Intent intent = new Intent(origin, MainActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		origin.startActivity(intent);
+	}
+	
+	/**
+	 * Fully log out of the application, by showing a dialog to the user (OK --> logout)
+	 * @param origin: the context to show the dialog in and navigate from
+	 */
+	public static void fullLogoutDialog( Activity origin ){
+		DialogFragment dialog = new AskLogoutDialog();
+		dialog.show(origin.getFragmentManager(), "logout");
 	}
 	
 	/** 
