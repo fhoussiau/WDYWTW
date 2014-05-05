@@ -1,6 +1,7 @@
 package com.sinf1225.whatdoyouwanttowatch;
 
 import java.util.ArrayList;
+
 import android.provider.SearchRecentSuggestions;
 import android.os.Bundle;
 import android.content.Context;
@@ -9,16 +10,23 @@ import android.app.ListActivity;
 import android.app.SearchManager;
 import android.view.Menu;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.Collections;
+
 public class SearchActivity extends ListActivity {
 
 	// liste des films affiches dans la liste
 	private ArrayList<Movie> listM;
+	
+	// mode d'affichage des films (ordre d'affichage)
+	private int mode = 0; // 0:name, 1:year, 2:director
+	private static final String[] buttonsName = {"name", "year", "director", "interest"};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,15 @@ public class SearchActivity extends ListActivity {
 						Application.openMovie(view.getContext(), listM.get(pos).getID());
 					}
 				});
+				
+				// pour le tri, il faut s'assurer que tous les films ont ete rempli
+				for(Movie movie: listM){
+					movie.getQuickData(db);
+				}
+				
+				// populate the button
+				setButtonText();
+				sortEntries();
 			}
 			else{
 				// No result found...
@@ -94,6 +111,44 @@ public class SearchActivity extends ListActivity {
 		searchView.setQueryRefinementEnabled(true);
 
 		return true;
+	}
+	
+	/**
+	 * Update the text on the button so that it matches the current search mode
+	 */
+	private void setButtonText(){
+		Button button = (Button) findViewById(R.id.button_sort_search);
+		button.setText( "Sort by: "+ buttonsName[ mode ] );
+	}
+	
+	/**
+	 * Sort the entries in the movies' list
+	 */
+	private void sortEntries(){
+		switch(mode){
+		case 0: // name
+			Collections.sort( listM, Movie.MovieTitleComparator );
+			break;
+		case 1: // year
+			Collections.sort( listM );
+			break;
+		case 2: // director
+			Collections.sort( listM, Movie.MovieDirectorComparator );
+			break;
+		case 3: // interest
+			Collections.sort( listM, Movie.MovieInterestComparator );
+			break;
+		}
+	}
+	
+	/**
+	 * Called when the button is clicked: change mode (and do all changes)
+	 * @param v
+	 */
+	public void onModeButtonClick(View v){
+		mode = (mode + 1) % buttonsName.length;
+		sortEntries();
+		setButtonText();
 	}
 
 }
