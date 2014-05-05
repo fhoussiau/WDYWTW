@@ -1,0 +1,215 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.sinf1225.whatdoyouwanttowatch.DisplayMovieActivity"
+    tools:ignore="MergeRootFrame" >
+
+    <!-- Default frame: displays information about the movie -->
+
+    <LinearLayout
+        android:id="@+id/success_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|fill_horizontal"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textview_director"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="Director"
+                android:textSize="17sp"
+                android:textStyle="normal"
+                android:typeface="sans" />
+
+            <TextView
+                android:id="@+id/textview_year"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Year"
+                android:textColor="@color/black_overlay"
+                android:layout_marginRight="10dp"
+                android:textSize="17sp"
+                android:typeface="monospace" />
+            
+            <TextView
+                android:id="@+id/textview_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="time"
+                android:textColor="@color/black_overlay"
+                android:textSize="17sp"
+                android:typeface="serif" />
+
+            <RatingBar
+                android:id="@+id/ratingbar_movie"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:isIndicator="false"
+                android:max="10"
+                android:numStars="5"
+                android:paddingLeft="0dp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id = "@+id/genre_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5sp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+            	android:textSize="15sp"
+                android:text="Genre:" 
+            	android:textStyle="bold"/>
+            <!-- Genres will be added programmatically here -->
+        </LinearLayout>
+        
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|fill_horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textSize="17sp"
+                android:typeface="normal"
+            	android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textview_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp"
+                android:text="all work and no play makes jack a dull boy..." />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id = "@+id/cast_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+
+            <TextView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cast"
+                android:textSize="17sp"
+            	android:textStyle="bold" />
+            
+            <!-- Cast members will be dynamically added here -->
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id = "@+id/awards_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+
+            <TextView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Awards"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+            
+            <!-- awards will be dynamically added here -->
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5sp"
+            android:paddingBottom="5sp">
+            <TextView
+                android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:textSize="15sp"
+            	android:text="Interest: "
+            	android:textStyle="bold"/>
+            <TextView
+                android:id = "@+id/textview_interest"
+                android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:textSize="15sp"
+            	android:onClick="onClickInterest"
+            	android:clickable="true"
+            	/>
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/related_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            
+        	<TextView
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:text="Related movies:"
+           		android:textStyle="bold" />
+        	
+        	<!-- movies will be dynamically added here -->
+        	
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- In case of failure (the movie is not found, display this) -->
+
+    <LinearLayout
+        android:id="@+id/failure_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="An error has occured..."
+			android:paddingBottom="25sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":-("
+            android:textSize="150sp" />
+
+    </LinearLayout>
+    
+</LinearLayout>

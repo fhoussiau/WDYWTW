@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    tools:context="com.sinf1225.whatdoyouwanttowatch.DiscoverMoviesActivity"
+    tools:ignore="MergeRootFrame"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_margin="5sp" >
+    
+    <TextView 
+        android:text="@string/label_mostwatched"
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+    <ListView
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_margin="5sp"
+    	android:id = "@+id/container_mostwatched" >
+        </ListView>
+        
+    <TextView 
+        android:text="@string/label_playingnow"
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+    <ListView
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_margin="5sp"
+    	android:id = "@+id/container_playingnow" >
+        </ListView>
+        
+    <TextView
+        android:text="@string/label_comingsoon"
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+    <ListView
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_margin="5sp"
+    	android:id = "@+id/container_comingsoon" >
+        </ListView>
+    
+</LinearLayout>
