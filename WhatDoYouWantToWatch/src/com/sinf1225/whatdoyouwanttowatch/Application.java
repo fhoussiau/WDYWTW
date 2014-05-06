@@ -41,6 +41,7 @@ public class Application {
 	public static void logout(){
 		currentUser = null;
 		clearMovies();  // empty the database
+		UserSuggestionGuesser.wipeGuesser();
 	}
 	
 	/**

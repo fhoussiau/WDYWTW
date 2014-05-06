@@ -16,10 +16,10 @@ public class UserSuggestionGuesser {
 	private static String UserActor;
 	
 	// currently, only fills genre
-	public void initGuesser(Context context){
+	public static void initGuesser(Context context){
 		Database db = new Database( context );
 		SQLiteDatabase rdb = db.getReadableDatabase();
-		Cursor cur = rdb.rawQuery("SELECT G."+Database.GENRE_GENRE+" COUNT(M."+Database.MOVIES_ID+")"+
+		Cursor cur = rdb.rawQuery("SELECT G."+Database.GENRE_GENRE+")"+
 								" FROM TABLES "+Database.TABLE_INTEREST+" M, "+Database.TABLE_GENRE+" G "+
 								"WHERE M."+Database.INTEREST_MOVIE+" = "+Database.GENRE_MOVIE+" AND "+
 								"M."+Database.INTEREST_INTEREST+" >= ? ORDER BY COUNT(M."+Database.MOVIES_ID+") DESC LIMIT 1" , 
@@ -30,7 +30,7 @@ public class UserSuggestionGuesser {
 		}
 	}
 	
-	public void wipeGuesser(){
+	public static void wipeGuesser(){
 		UserGenre = null;
 		UserDirector = null;
 		UserActor = null;
