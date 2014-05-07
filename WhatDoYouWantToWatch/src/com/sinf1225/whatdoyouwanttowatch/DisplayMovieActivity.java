@@ -88,7 +88,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		}
 		year_tv.setText( yeartext );
 		// put duration in the correct format and check if there is a duration to display (movie exists)
-		if(movie.duration < 0){
+		if(movie.duration <= 0){
 			duration_tv.setText("Coming soon...");
 		}
 		else{
@@ -101,7 +101,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 			duration_tv.setText( Integer.toString(hour)+"h"+minutestext );
 		}
 		description_tv.setText( movie.description );
-		if(movie.rating < 0){
+		if(movie.rating <= 0){
 			rating_rb.setVisibility(TextView.GONE);
 		}
 		rating_rb.setRating( movie.rating/2 );
