@@ -28,6 +28,7 @@
     <string name="search_movie">Search for a movie</string>
     <string name="discover_movie">Discover movies</string>
     <string name="surprise_movie">Surprise me!</string>
+     <string name="suggestion_movie">You might like...</string>
 
     <!-- Settings menu -->
     <string name="settings_category_user">User settings</string>

@@ -16,7 +16,11 @@ public class UserSuggestionGuesser {
 	private static String UserDirector;
 	private static String UserActor;
 	
-	// currently, only fills genre
+	/**
+	 * Guess the favorite genre, director and actor of the current user, loading from database
+	 * @param context: the context initiating the request to init
+	 * TODO: add director and actor guessing
+	 */
 	public static void initGuesser(Context context){
 		Database db = new Database( context );
 		SQLiteDatabase rdb = db.getReadableDatabase();
@@ -35,6 +39,14 @@ public class UserSuggestionGuesser {
 			UserGenre = Genre.values()[ genre ];
 		}
 		Log.d("GUESSER", "Your favorite genre: "+UserGenre.toString());
+	}
+	
+	/**
+	 * Get the user's favorite genre
+	 * @return
+	 */
+	public static Genre getUserGenre(){
+		return UserGenre;
 	}
 	
 	public static void wipeGuesser(){

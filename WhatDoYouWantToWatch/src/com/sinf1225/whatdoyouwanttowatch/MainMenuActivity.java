@@ -53,6 +53,10 @@ public class MainMenuActivity extends Activity {
 		// TODO
 	}
 	
+	public void onClickSuggestionMovie(View v){
+		Database db = new Database(this);
+		Application.openMovie(this, db.getSuggestionMovie().getID());
+	}
 	
 	// menu buttons
 	public void onClickSurpriseMe(View v){

@@ -13,7 +13,8 @@
         android:id="@+id/button_sort_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onModeButtonCLick" />
+        android:background="@color/transparent"
+        android:onClick="onModeButtonClick" />
     
 	<ListView
 	    android:id="@android:id/list"
