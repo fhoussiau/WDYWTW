@@ -869,7 +869,6 @@ public class Database extends SQLiteOpenHelper {
 				TABLE_USERS+" ORDER BY "+USERS_LASTACCESS+" DESC;", null);
 		cur2.moveToFirst();
 		while(!cur2.isAfterLast()){
-			Log.e("YEK YEK", cur2.getString(0)+" >>> "+Integer.toString(cur2.getInt(1)));
 			cur2.moveToNext();
 		}
 		if(cur.getCount() < 1){
@@ -1252,6 +1251,31 @@ public class Database extends SQLiteOpenHelper {
 	public Movie[] getComingSoon(int n){
 		return this.getNGenericTableMovies(n, TABLE_COMINGSOON);
 	}
+	
+	/**
+	 * Get the list of all movies set on WANTOWATCHIT
+	 * @return a Movie's array
+	 */
+	public Movie[] getWatchList(){
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cur = db.rawQuery("SELECT "+INTEREST_MOVIE+" FROM "+TABLE_INTEREST+
+									" WHERE "+INTEREST_INTEREST+" = ?;",
+									new String [] { Integer.toString( Interest.WANTTOWATCHIT.ordinal()) });
+		int numM = cur.getCount();
+		Movie[] res = new Movie[numM];
+		if(numM>0) {
+			cur.moveToFirst();
+			int iter=0;
+			while(!cur.isAfterLast()){
+				res[iter] = Application.getMovie( cur.getString(0) );
+				iter++;
+				cur.moveToNext();
+			}
+		}
+		return res;
+	}
+
+
 
 
 

@@ -28,8 +28,8 @@
         android:onClick="onClickSearchMovie"
         android:paddingLeft="25dp"
         android:paddingRight="25dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:textSize="20sp"
         android:layout_marginTop="10dp"/>
     
@@ -40,8 +40,8 @@
         android:onClick="onClickDiscoverMovie"
         android:paddingLeft="25dp"
         android:paddingRight="25dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:textSize="20sp"
         android:layout_marginTop="10dp"/>
     
@@ -52,8 +52,8 @@
         android:onClick="onClickSurpriseMe"
         android:paddingLeft="25dp"
         android:paddingRight="25dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:textSize="20sp"
         android:layout_marginTop="10dp"/>
     
@@ -64,8 +64,20 @@
         android:onClick="onClickSuggestionMovie"
         android:paddingLeft="25dp"
         android:paddingRight="25dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
+        android:textSize="20sp"
+        android:layout_marginTop="10dp"/>
+    
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/watchlist"
+        android:onClick="onClickWatchList"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:textSize="20sp"
         android:layout_marginTop="10dp"/>
     

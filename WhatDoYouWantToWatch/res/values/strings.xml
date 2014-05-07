@@ -28,7 +28,8 @@
     <string name="search_movie">Search for a movie</string>
     <string name="discover_movie">Discover movies</string>
     <string name="surprise_movie">Surprise me!</string>
-     <string name="suggestion_movie">You might like...</string>
+    <string name="suggestion_movie">You might like...</string>
+    <string name="watchlist">Watchlist</string>
 
     <!-- Settings menu -->
     <string name="settings_category_user">User settings</string>
@@ -37,7 +38,7 @@
     <!-- Movie menu -->
     <string name="moviemenu_interest">Interest</string>
     <string name="title_activity_choose_interest">Choose Interest</string>
-    
+
     <!-- Discover movies -->
     <string name="label_mostwatched">Most Watched</string>
     <string name="label_playingnow">Playing Now</string>
@@ -51,7 +52,7 @@
     <string name="Year">Movie Year</string>
     <string name="Director">Movie Director</string>
     <string name="title_activity_discover_movies">Discover Movies</string>
-    
+
     <!-- Settings -->
     <string name="title_activity_settings">Settings</string>
     <string name="pref_binary_title">Display dates in Binary</string>
@@ -61,5 +62,6 @@
     <string name="pref_nsearch_title">Number to search</string>
     <string name="pref_nsearch_descr">Number of movies to search for and display per category (title, year, director), when using search</string>
     <string name="nsearch_default">10</string>
+    <string name="title_activity_watch_list">WatchList</string>
 
 </resources>

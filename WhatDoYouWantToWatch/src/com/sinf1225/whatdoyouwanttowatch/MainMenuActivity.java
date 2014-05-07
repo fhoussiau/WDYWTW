@@ -71,5 +71,10 @@ public class MainMenuActivity extends Activity {
 		Intent intent = new Intent(this, DiscoverMoviesActivity.class);
 		startActivity(intent);
 	}
+	public void onClickWatchList(View v){
+		Intent intent = new Intent(this,WatchListActivity.class);
+		startActivity(intent);
+	}
+
 	
 }
