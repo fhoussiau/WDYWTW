@@ -75,6 +75,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		TextView director_tv = (TextView) findViewById(R.id.textview_director);
 		TextView year_tv = (TextView) findViewById(R.id.textview_year);
 		TextView duration_tv = (TextView) findViewById(R.id.textview_duration);
+		TextView rating_tv = (TextView) findViewById(R.id.rating_text);
 		RatingBar rating_rb = (RatingBar) findViewById(R.id.ratingbar_movie);
 		// set description
 		TextView description_tv = (TextView) findViewById(R.id.textview_description);
@@ -86,20 +87,34 @@ public class DisplayMovieActivity extends ActionBarActivity {
 			yeartext = Integer.toBinaryString(movie.year);
 		}
 		year_tv.setText( yeartext );
-		// put duration in the 
-		int hour = movie.duration / 60,
-			minutes = movie.duration % 60;
-		String minutestext = Integer.toString(minutes);
-		if(minutes<10){
-			minutestext = "0" + minutestext;
+		// put duration in the correct format and check if there is a duration to display (movie exists)
+		if(movie.duration < 0){
+			duration_tv.setText("Coming soon...");
 		}
-		duration_tv.setText( Integer.toString(hour)+"h"+minutestext );
+		else{
+			int hour = movie.duration / 60,
+					minutes = movie.duration % 60;
+			String minutestext = Integer.toString(minutes);
+			if(minutes<10){
+				minutestext = "0" + minutestext;
+			}
+			duration_tv.setText( Integer.toString(hour)+"h"+minutestext );
+		}
 		description_tv.setText( movie.description );
+		if(movie.rating < 0){
+			rating_rb.setVisibility(TextView.GONE);
+		}
 		rating_rb.setRating( movie.rating/2 );
 		// populate and color interest
 		TextView interest_tv = (TextView) findViewById(R.id.textview_interest);
 		interest_tv.setText(movie.InterestForUser.toString());
 		interest_tv.setTextColor(movie.InterestForUser.toColor());
+		// set age restriction and color accordingly
+		rating_tv.setText("Age Restriction: "+Integer.toString(movie.ageRestrictions));
+		if( Application.getUser().getAge() < movie.ageRestrictions ){
+			// in red if you are too young!
+			rating_tv.setTextColor(0xFFFF0000);
+		}
 		
 		// then, populate awards and cast from lists
 		// TODO: SWITCH TO LISTVIEWS

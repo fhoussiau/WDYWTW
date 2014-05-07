@@ -17,7 +17,7 @@
     <string name="main_logo_desc">Main Logo</string>
 
     <!-- Create new user -->
-    <string name="login_hint_age">Your age</string>
+    <string name="login_hint_age">dd/mm/yyyy: Your birth date</string>
     <string name="newuser_button">Create User</string>
     <string name="newuser_wrong">Wrong User Configuration</string>
 
@@ -56,5 +56,10 @@
     <string name="title_activity_settings">Settings</string>
     <string name="pref_binary_title">Display dates in Binary</string>
     <string name="pref_binary_descr">Display movies\' dates in binary (for advanced users only)</string>
+    <string name="pref_wifi_title">Internet search</string>
+    <string name="pref_wifi_descr">Allow the app to look for movies on the Internet, before searching locally</string>
+    <string name="pref_nsearch_title">Number to search</string>
+    <string name="pref_nsearch_descr">Number of movies to search for and display per category (title, year, director), when using search</string>
+    <string name="nsearch_default">10</string>
 
 </resources>

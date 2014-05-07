@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
@@ -19,8 +20,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		// see if no user was just created
 		Intent intent = getIntent();
+		String name; // default name to display
 		if(intent!=null){
-			String name = intent.getStringExtra(EXTRA_MESSAGE);
+			name = intent.getStringExtra(EXTRA_MESSAGE);
 			if(name!=null){
 				// create a toast
 				Context context = getApplicationContext();
@@ -28,11 +30,23 @@ public class MainActivity extends Activity {
 
 				Toast toast = Toast.makeText(context, "User "+name+" was created!", duration);
 				toast.show();
-				
-				// display the name of the user in the name field
-				EditText nameField = (EditText) findViewById(R.id.editText1);
-				nameField.setText(name);
 			}
+			else{
+				// try and find the last user, insert his name
+				Database db = new Database(this);
+				name = db.getLastUserName();
+			}
+		}
+		else{
+			// try and find the last user, insert his name
+			Database db = new Database(this);
+			name = db.getLastUserName();
+		}
+		// display name if not null
+		if(name!=null){
+			// display the name of the user in the name field
+			EditText nameField = (EditText) findViewById(R.id.editText1);
+			nameField.setText(name);
 		}
 	}
 
@@ -56,7 +70,6 @@ public class MainActivity extends Activity {
 		}
 		// try to log in through the application
 		boolean canLogin = Application.login(this, name, password);
-		
 		// respond accordingly
 		if(canLogin){
 			// hide the error message

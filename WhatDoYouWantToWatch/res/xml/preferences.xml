@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <CheckBoxPreference
+        android:key="pref_wifi"
+        android:title="@string/pref_wifi_title"
+        android:summary="@string/pref_wifi_descr"
+        android:defaultValue="true"/>
+    <ListPreference
+        android:key="pref_nsearch"
+        android:title="@string/pref_nsearch_title"
+        android:summary="@string/pref_nsearch_descr"
+        android:entries="@array/number_display_search"
+        android:entryValues="@array/number_display_search"
+        android:defaultValue="@string/nsearch_default"/>
+    <CheckBoxPreference
         android:key="pref_binary"
         android:title="@string/pref_binary_title"
         android:summary="@string/pref_binary_descr"

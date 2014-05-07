@@ -3,10 +3,12 @@ package com.sinf1225.whatdoyouwanttowatch;
 import java.util.ArrayList;
 
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.view.Menu;
@@ -43,8 +45,12 @@ public class SearchActivity extends ListActivity {
 					MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
 			suggestions.saveRecentQuery(query, null);
 			Database db = new Database( this );
-			// Recuperation de la liste des films
-			listM = db.Search_Movie(query);
+			
+			// recuperer dans les preferences le nombre de films a chercher
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+			int toSearch = Integer.parseInt(pref.getString("pref_nsearch", "10"));
+			// Recherche dans la base de donnees
+			listM = db.Search_Movie(query, toSearch);
 
 			if(listM!=null && listM.size()> 0){
 				// Creation et initialisation de l'Adapter pour les personnes

@@ -37,8 +37,8 @@ public class UserSuggestionGuesser {
 			cur.moveToFirst();
 			int genre = cur.getInt(0);
 			UserGenre = Genre.values()[ genre ];
+			Log.v("Your favorite genre", UserGenre.toString());
 		}
-		Log.d("GUESSER", "Your favorite genre: "+UserGenre.toString());
 	}
 	
 	/**

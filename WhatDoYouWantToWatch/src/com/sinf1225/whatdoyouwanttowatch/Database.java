@@ -1,6 +1,9 @@
 package com.sinf1225.whatdoyouwanttowatch;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
@@ -16,17 +19,22 @@ public class Database extends SQLiteOpenHelper {
 
 	// constants for database handling
 	public static final String DATABASE_NAME = "WDYWTW.db";
-	public static final int DATABASE_VERSION = 9;
+	public static final int DATABASE_VERSION = 13;
+	private static final String DATE_FORMAT = "dd/mm/yyyy";
+	public static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+	public static final Calendar currentTime = Calendar.getInstance();
 
 	// users table
 	public static final String TABLE_USERS = "users";
 	public static final String USERS_NAME  = "name";
-	public static final String USERS_AGE   = "age";
+	public static final String USERS_BIRTHDAY   = "birthday";
 	public static final String USERS_PSWD  = "password";
+	public static final String USERS_LASTACCESS = "lastaccess"; // this field is a long (s since Epoch)
 	public static final String[] USERS_COLUMNS = new String[] {
 		USERS_NAME, 
-		USERS_AGE,
-		USERS_PSWD
+		USERS_BIRTHDAY,
+		USERS_PSWD,
+		USERS_LASTACCESS
 	};
 
 	// movies table
@@ -116,8 +124,9 @@ public class Database extends SQLiteOpenHelper {
 		// users table
 		db.execSQL("CREATE TABLE "+TABLE_USERS+ " (" +
 				USERS_NAME + " TEXT NOT NULL PRIMARY KEY," +
-				USERS_AGE  + " INTEGER," +
-				USERS_PSWD + " TEXT NOT NULL);");
+				USERS_BIRTHDAY  + " TEXT NOT NULL," +
+				USERS_PSWD + " TEXT NOT NULL, "+
+				USERS_LASTACCESS+ " INTEGER NOT NULL);");
 		// movies table
 		db.execSQL("CREATE TABLE "+TABLE_MOVIES+" (" +
 				MOVIES_ID + " TEXT NOT NULL PRIMARY KEY," +
@@ -787,10 +796,23 @@ public class Database extends SQLiteOpenHelper {
 				null, //new String[] {userName, password},
 				null, null, null, null
 				);
-		return cursor.getCount()==1;
+		Cursor cur2 = db.rawQuery("SELECT * FROM "+TABLE_USERS, null);
+		cur2.moveToFirst();
+		while( !cur2.isAfterLast() ){
+			cur2.moveToNext();
+		}
+		boolean login = cursor.getCount()==1;
+		if(login){
+			// update last access time into database
+			SQLiteDatabase wdb = this.getWritableDatabase();
+			wdb.execSQL("UPDATE "+TABLE_USERS+" SET "+USERS_LASTACCESS+" = "+
+					Long.toString(currentTime.getTimeInMillis()/10000)+" WHERE "+USERS_NAME+
+					" = \""+userName+"\";");
+		}
+		return login;
 	}
 
-	public boolean newUser(String userName, String password, int age){
+	public boolean newUser(String userName, String password, Date birthday){
 		// check if name already exists
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query( true, 
@@ -805,35 +827,57 @@ public class Database extends SQLiteOpenHelper {
 		}
 		// user does not exist
 		db = this.getWritableDatabase();
-		db.execSQL("INSERT INTO "+TABLE_USERS+"("+USERS_NAME+", "+
-				USERS_PSWD+", "+USERS_AGE+") VALUES (\""
-				+userName+"\", \""+password+
-				"\", "+Integer.toString(age)+");");
+		db.execSQL("INSERT INTO "+TABLE_USERS+" VALUES (\""
+				+userName+"\", \""+formatter.format( birthday )+
+				"\", \""+password+"\", \""+Long.toString(currentTime.getTimeInMillis()/10000)+"\");");
 		return true;
 	}
 
-	public int getUserAge(String name){
+	public Date getUserBirthday(String name){
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.query( true,
 				TABLE_USERS, 
-				new String[] {USERS_AGE},
+				new String[] {USERS_BIRTHDAY},
 				USERS_NAME+" = \""+name+"\"",
 				null, null, null, null, null);
 		cursor.moveToFirst();
-		if(cursor.getCount() < 1){
-			return 0;
+		try{
+			return  formatter.parse( cursor.getString(0) );
 		}
-		return cursor.getInt(0);
+		catch(Exception error){
+			return null;
+		}
 	}
 
 
-	public void setUserAge(String name, int age){
+	public void setUserAge(String name, Date birthday){
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.execSQL("UPDATE "+TABLE_USERS+" SET "+
-				USERS_AGE+" = "+Integer.toString(age) + 
+				USERS_BIRTHDAY+" = "+ formatter.format(birthday) + 
 				" WHERE " + USERS_NAME + " = \""+name+"\";");
 	}
 
+	/**
+	 * Returns the name of the user who last accessed the application
+	 * @return a String containing the name of the user, null if no user is in the DB
+	 */
+	public String getLastUserName(){
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cur = db.rawQuery("SELECT "+USERS_NAME+" FROM "+TABLE_USERS+
+				" ORDER BY "+USERS_LASTACCESS+" DESC;", null);
+		Cursor cur2 = db.rawQuery("SELECT "+USERS_NAME+","+USERS_LASTACCESS+ " FROM "+
+				TABLE_USERS+" ORDER BY "+USERS_LASTACCESS+" DESC;", null);
+		cur2.moveToFirst();
+		while(!cur2.isAfterLast()){
+			Log.e("YEK YEK", cur2.getString(0)+" >>> "+Integer.toString(cur2.getInt(1)));
+			cur2.moveToNext();
+		}
+		if(cur.getCount() < 1){
+			return null;
+		}
+		cur.moveToFirst();
+		return cur.getString(0); // return only first entry!
+	}
 
 
 	// movie part
@@ -1063,20 +1107,23 @@ public class Database extends SQLiteOpenHelper {
 
 
 	private static final int MAX_MOVIES_MATCH = 10;
-	private static final int MAX_DIRECTOR_MATCH = 10;
-	private static final int MAX_YEAR_MATCH = 10;
 
 
 	// search
 
+	public ArrayList<Movie> Search_Movie(String query){
+		return Search_Movie(query, MAX_MOVIES_MATCH);
+	}
+	
 	/**
 	 * Search the database with the given string as a query.
 	 * This searches first for the name, then the year, then the director
 	 * @param query: the query, that is (approximately) the title or the director, or (exactly) the year of the movie
+	 * @param nMovies: number of movies to look for, per category
 	 * @return a list, possibly empty, of movies
 	 * TODO: add features
 	 */
-	public ArrayList<Movie> Search_Movie(String query){
+	public ArrayList<Movie> Search_Movie(String query, int nMovies){
 		SQLiteDatabase db = this.getReadableDatabase();
 		ArrayList<Movie> result = new ArrayList<Movie>();
 		// first, check if movie has year-like format
@@ -1092,7 +1139,7 @@ public class Database extends SQLiteOpenHelper {
 					" WHERE "+MOVIES_YEAR+" = ?", 
 					new String[] { query });
 			cur.moveToFirst(); int iter =0;
-			while(!cur.isAfterLast() && iter<MAX_YEAR_MATCH) {
+			while(!cur.isAfterLast() && iter<nMovies) {
 				Movie mov = Application.getMovie(cur.getString(0));
 				mov.getQuickData(this);
 				result.add(mov);
@@ -1108,7 +1155,7 @@ public class Database extends SQLiteOpenHelper {
 				);
 		// add movies found to value
 		cur.moveToFirst(); int iter =0;
-		while(!cur.isAfterLast() && iter<MAX_MOVIES_MATCH) {
+		while(!cur.isAfterLast() && iter<nMovies) {
 			Movie mov = Application.getMovie(cur.getString(0));
 			mov.getQuickData(this);
 			result.add(mov);
@@ -1123,7 +1170,7 @@ public class Database extends SQLiteOpenHelper {
 				);
 		// add movies found to value
 		cur.moveToFirst(); iter =0;
-		while(!cur.isAfterLast() && iter<MAX_DIRECTOR_MATCH) {
+		while(!cur.isAfterLast() && iter<nMovies) {
 			Movie mov = Application.getMovie(cur.getString(0));
 			mov.getQuickData(this);
 			result.add(mov);
@@ -1142,36 +1189,21 @@ public class Database extends SQLiteOpenHelper {
 	public Movie getSuggestionMovie(){
 		SQLiteDatabase db = this.getReadableDatabase();
 		ArrayList<String> possibilities = new ArrayList<String>();
-		Cursor cur1 = db.rawQuery("SELECT "+GENRE_MOVIE+" FROM "+TABLE_GENRE+
-				" WHERE "+GENRE_GENRE+ " = ?;",
-				new String [] { 
-				Integer.toString( UserSuggestionGuesser.getUserGenre().ordinal() )
-		});
-		if(cur1.getCount()>0){
-			cur1.moveToFirst(); 
-			int iter =0;
-			while(!cur1.isAfterLast() && iter<MAX_MOVIES_MATCH) {
-				String SuggestionMovieID = cur1.getString(0);
-				Cursor cur2 = db.rawQuery("SELECT "+INTEREST_INTEREST+" FROM "+TABLE_INTEREST+
-						" WHERE "+INTEREST_MOVIE+ " = ?;",
-						new String [] { SuggestionMovieID });
-				if(cur2.getCount()>0){
-					cur2.moveToFirst();
-
-					if (cur2.getInt(0) == Interest.NOINTEREST.ordinal()) {
-						Cursor cur3 = db.rawQuery("SELECT "+MOVIES_RATING+" FROM "+TABLE_MOVIES+
-								" WHERE "+MOVIES_ID+ " = ?;",
-								new String [] { SuggestionMovieID });
-						if(cur3.getCount()>0){
-							cur3.moveToFirst();
-
-							if (cur3.getInt(0)>0.6){
-								possibilities.add(SuggestionMovieID);
-							}
-						}
-					}
-				}
-				cur1.moveToNext();
+		Cursor cur = db.rawQuery("SELECT "+TABLE_MOVIES+"."+MOVIES_ID+" FROM "+
+				TABLE_GENRE+","+TABLE_INTEREST+","+TABLE_MOVIES+" WHERE "+
+				TABLE_MOVIES+"."+MOVIES_ID+" = "+TABLE_GENRE+"."+GENRE_MOVIE+" AND "+
+				TABLE_INTEREST+"."+INTEREST_MOVIE+" = "+TABLE_GENRE+"."+GENRE_MOVIE+
+				" AND "+TABLE_GENRE+"."+GENRE_GENRE+" = ? "+" AND "+
+				TABLE_INTEREST+"."+INTEREST_INTEREST+" = ?; "/*+" AND "+
+				TABLE_MOVIES+"."+ MOVIES_RATING+" > 0.6;"*/, // works, without this line ;)
+				new String [] { Integer.toString(UserSuggestionGuesser.getUserGenre().ordinal()), 
+								Integer.toString(Interest.NOINTEREST.ordinal())} );
+		if(cur.getCount()>0){
+			cur.moveToFirst();
+			int iter=0;
+			while(!cur.isAfterLast() && iter<MAX_MOVIES_MATCH) {
+				possibilities.add(cur.getString(0));
+				cur.moveToNext();
 				iter++;
 			}
 		}
@@ -1185,6 +1217,8 @@ public class Database extends SQLiteOpenHelper {
 			return this.getRandomMovie();
 		}
 	}
+
+
 
 
 	/**

@@ -1,10 +1,14 @@
 package com.sinf1225.whatdoyouwanttowatch;
 
+import java.text.ParseException;
+import java.util.Date;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 
@@ -25,30 +29,27 @@ public class NewUserActivity extends Activity {
 	}
 	
 	public void createUserClick(View view){
-		TextView nameText = (TextView) findViewById(R.id.editText1);
-		TextView pswdText = (TextView) findViewById(R.id.editText2);
-		TextView  ageText = (TextView) findViewById(R.id.editText3);
-		int age;
+		EditText nameText = (EditText) findViewById(R.id.editText1);
+		EditText pswdText = (EditText) findViewById(R.id.editText2);
+		EditText dobpicker = (EditText) findViewById(R.id.editTextAge);
+		// first, get birth date (tricky)
+		Date birthday;
 		try{
-			age = Integer.parseInt(ageText.getText().toString());
+			birthday = Database.formatter.parse( dobpicker.getText().toString() );
 		}
-		catch(NumberFormatException e){
-			errorText("Invalid age format");
+		catch(ParseException error){
+			errorText("Invalid Date format: must be dd/mm/yyyy");
 			return;
 		}
 		String name = nameText.getText().toString();
 		String pswd = pswdText.getText().toString();
-		if(age<1 || age>150){
-			errorText("Invalid age (too old or non-existent)");
-			return;
-		}
 		if(nameText.equals("") || pswd.equals("")){
 			errorText("Name or Password field empty");
 			return;
 		}
 		// no error
 		Database db = new Database(this);
-		boolean success = db.newUser(name, pswd, age);
+		boolean success = db.newUser(name, pswd, birthday);
 		if(!success){
 			errorText("User already exists.");
 		}

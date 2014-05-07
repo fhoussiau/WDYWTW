@@ -6,7 +6,7 @@
     tools:context="com.sinf1225.whatdoyouwanttowatch.NewUserActivity"
     tools:ignore="MergeRootFrame">
 
-    <LinearLayout
+   <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -31,12 +31,12 @@
             android:hint="@string/login_hint_pswd"
             android:inputType="textPassword" />
 
+
         <EditText
-            android:id="@+id/editText3"
+            android:id="@+id/editTextAge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/login_hint_age"
-            android:ems="10" />
+            android:hint = "@string/login_hint_age"/>
         
         <TextView
             android:id="@+id/textViewRed"
