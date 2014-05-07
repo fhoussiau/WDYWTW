@@ -30,6 +30,7 @@ public class Application {
 				);
 		if(canLogin){
 			currentUser = new User( context, name );
+			UserSuggestionGuesser.initGuesser( context );
 		}
 		return canLogin;
 	}

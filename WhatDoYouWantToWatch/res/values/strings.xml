@@ -14,6 +14,7 @@
     <string name="login_login_button">Login</string>
     <string name="login_newuser_button">New User</string>
     <string name="login_wrong_login">Wrong Name-Password combination</string>
+    <string name="main_logo_desc">Main Logo</string>
 
     <!-- Create new user -->
     <string name="login_hint_age">Your age</string>
