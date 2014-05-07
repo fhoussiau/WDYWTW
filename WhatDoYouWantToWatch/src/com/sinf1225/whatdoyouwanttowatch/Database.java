@@ -1,7 +1,9 @@
 package com.sinf1225.whatdoyouwanttowatch;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Random;
+import java.util.Set;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -1085,7 +1087,7 @@ public class Database extends SQLiteOpenHelper {
 		catch(NumberFormatException error){
 		}
 		if(year != -1){
-			Cursor cur = db.rawQuery("SELECT "+MOVIES_ID+
+			Cursor cur = db.rawQuery("SELECT DISTINCT "+MOVIES_ID+
 					" FROM "+ TABLE_MOVIES+
 					" WHERE "+MOVIES_YEAR+" = ?", 
 					new String[] { query });
@@ -1099,7 +1101,7 @@ public class Database extends SQLiteOpenHelper {
 			}
 		}
 		// search for name
-		Cursor cur = db.rawQuery("SELECT "+MOVIES_ID+
+		Cursor cur = db.rawQuery("SELECT DISTINCT "+MOVIES_ID+
 				" FROM " + TABLE_MOVIES +
 				" WHERE "+MOVIES_NAME+" LIKE '%"+query+"%'",
 				null
@@ -1114,7 +1116,7 @@ public class Database extends SQLiteOpenHelper {
 			iter++;
 		}
 		// search for director
-		cur = db.rawQuery("SELECT "+MOVIES_ID+
+		cur = db.rawQuery("SELECT DISTINCT "+MOVIES_ID+
 				" FROM " + TABLE_MOVIES +" "+
 				" WHERE "+MOVIES_DIRECTOR+ " LIKE '%"+query+"%'",
 				null
@@ -1129,6 +1131,11 @@ public class Database extends SQLiteOpenHelper {
 			iter++;
 		}
 		db.close();
+		// remove the duplicates
+		Set<Movie> allitems = new LinkedHashSet<Movie>(result);
+		result.clear();
+		result.addAll( allitems );
+		// return list
 		return result;
 	}
 

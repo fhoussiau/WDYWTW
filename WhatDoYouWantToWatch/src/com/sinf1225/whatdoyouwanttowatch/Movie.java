@@ -102,6 +102,17 @@ public class Movie implements Comparable<Movie> {
 		this.InterestForUser = quickData.interest;
 		return quickData;
 	}
+	
+	// equality methods
+	@Override
+	public boolean equals(Object o){
+		try{
+			return this.imdbID.equals( ((Movie)o).getID() );
+		}
+		catch(ClassCastException error){
+			return false;
+		}
+	}
 
 	// comparison method
 	public int compareTo(Movie movie){

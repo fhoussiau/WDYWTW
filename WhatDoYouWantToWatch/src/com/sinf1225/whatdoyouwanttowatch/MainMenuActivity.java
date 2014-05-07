@@ -50,7 +50,7 @@ public class MainMenuActivity extends Activity {
 		onSearchRequested();
 	}
 	private void openSettings(){
-		// TODO
+		startActivity( new Intent(this, SettingsActivity.class) );
 	}
 	
 	public void onClickSuggestionMovie(View v){

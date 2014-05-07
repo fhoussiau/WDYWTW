@@ -3,6 +3,8 @@ package com.sinf1225.whatdoyouwanttowatch;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +62,13 @@ public class MovieAdapter extends BaseAdapter {
 		MovieQuickData quickdat = MovieList.get(position).getQuickData(mContext);
 		Movie_Title.setText(quickdat.title);
 		Movie_Director.setText(quickdat.director);
-		Movie_Year.setText(Integer.toString(quickdat.year));
+		// easter egg
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+		String yeartext = Integer.toString(quickdat.year);
+		if(pref.getBoolean("pref_binary", false)){
+			yeartext = Integer.toBinaryString(quickdat.year);
+		}
+		Movie_Year.setText(yeartext);
 
 		//On retourne l'item cree.
 		return layoutItem;

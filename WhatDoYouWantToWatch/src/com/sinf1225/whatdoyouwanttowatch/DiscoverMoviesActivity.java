@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -90,7 +92,7 @@ public class DiscoverMoviesActivity extends ActionBarActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
-			// TODO: add settings!
+			startActivity( new Intent(this, SettingsActivity.class) );
 			return true;
 		}
 		if(id == R.id.action_search){

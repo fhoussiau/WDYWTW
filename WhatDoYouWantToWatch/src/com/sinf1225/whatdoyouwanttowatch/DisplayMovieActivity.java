@@ -5,7 +5,10 @@ import java.util.Hashtable;
 import android.support.v7.app.ActionBarActivity;
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -73,12 +76,24 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		TextView year_tv = (TextView) findViewById(R.id.textview_year);
 		TextView duration_tv = (TextView) findViewById(R.id.textview_duration);
 		RatingBar rating_rb = (RatingBar) findViewById(R.id.ratingbar_movie);
+		// set description
 		TextView description_tv = (TextView) findViewById(R.id.textview_description);
 		director_tv.setText( movie.director );
-		year_tv.setText( Integer.toString(movie.year));
+		// set year (beware, easter egg here)
+		String yeartext = Integer.toString(movie.year);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		if(pref.getBoolean("pref_binary", false)){
+			yeartext = Integer.toBinaryString(movie.year);
+		}
+		year_tv.setText( yeartext );
+		// put duration in the 
 		int hour = movie.duration / 60,
 			minutes = movie.duration % 60;
-		duration_tv.setText( Integer.toString(hour)+"h"+Integer.toString(minutes) );
+		String minutestext = Integer.toString(minutes);
+		if(minutes<10){
+			minutestext = "0" + minutestext;
+		}
+		duration_tv.setText( Integer.toString(hour)+"h"+minutestext );
 		description_tv.setText( movie.description );
 		rating_rb.setRating( movie.rating/2 );
 		// populate and color interest
@@ -117,7 +132,14 @@ public class DisplayMovieActivity extends ActionBarActivity {
 			for(Movie related: movie.RelatedMovies){
 				MovieQuickData data = related.getQuickData(this);
 				Button link = new Button(this);
-				link.setText(data.title+" ("+data.year+")");
+				String text = data.title + " (";
+				if(pref.getBoolean("pref_binary", false)){
+					text += Integer.toBinaryString(data.year) + ")";
+				}
+				else{
+					text += Integer.toString(data.year) + ")";
+				}
+				link.setText(text);
 				moviesShowed.put(link, related);
 				link.setLayoutParams( new LayoutParams(LayoutParams.WRAP_CONTENT, 
 						LayoutParams.WRAP_CONTENT) );
@@ -192,6 +214,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+			startActivity( new Intent(this, SettingsActivity.class) );
 			return true;
 		}
 		if(id == R.id.action_interest){

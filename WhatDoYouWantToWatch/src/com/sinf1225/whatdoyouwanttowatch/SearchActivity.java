@@ -2,6 +2,7 @@ package com.sinf1225.whatdoyouwanttowatch;
 
 import java.util.ArrayList;
 
+import android.preference.PreferenceActivity;
 import android.provider.SearchRecentSuggestions;
 import android.os.Bundle;
 import android.content.Context;
@@ -92,6 +93,8 @@ public class SearchActivity extends ListActivity {
 		case R.id.action_back:
 			Application.goHome(this);
 			return true;
+		case R.id.action_settings:
+			startActivity( new Intent(this, SettingsActivity.class) );
 		default:
 			return super.onOptionsItemSelected(item);
 		}

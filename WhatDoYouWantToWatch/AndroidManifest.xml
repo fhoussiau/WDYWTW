@@ -53,7 +53,7 @@
         </activity>
         <activity
             android:name="com.sinf1225.whatdoyouwanttowatch.DiscoverMoviesActivity"
-            android:label="@string/title_activity_discover_movies">
+            android:label="@string/title_activity_discover_movies" >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value="com.sinf1225.whatdoyouwanttowatch.SearchActivity" />
@@ -63,6 +63,10 @@
             android:name="com.sinf1225.whatdoyouwanttowatch.MySuggestionProvider"
             android:authorities="com.example.MySuggestionProvider" />
 
+        <activity
+            android:name="com.sinf1225.whatdoyouwanttowatch.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>
