@@ -23,6 +23,7 @@ public class SearchActivity extends ListActivity {
 
 	// liste des films affiches dans la liste
 	private ArrayList<Movie> listM;
+	private MovieAdapter adapter;
 	
 	// mode d'affichage des films (ordre d'affichage)
 	private int mode = 0; // 0:name, 1:year, 2:director
@@ -44,9 +45,9 @@ public class SearchActivity extends ListActivity {
 			// Recuperation de la liste des films
 			listM = db.Search_Movie(query);
 
-			if(listM.size()> 0){
+			if(listM!=null && listM.size()> 0){
 				// Creation et initialisation de l'Adapter pour les personnes
-				MovieAdapter adapter = new MovieAdapter(this, listM);
+				adapter = new MovieAdapter(this, listM);
 
 				//Recuperation du composant ListView
 				ListView list = (ListView)findViewById(android.R.id.list);
@@ -139,6 +140,7 @@ public class SearchActivity extends ListActivity {
 			Collections.sort( listM, Movie.MovieInterestComparator );
 			break;
 		}
+		adapter.notifyDataSetChanged();
 	}
 	
 	/**

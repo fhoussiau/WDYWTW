@@ -12,6 +12,7 @@ public class MovieQuickData {
 		this.title = title;
 		this.director = director;
 		this.year = year;
+		this.interest = interest;
 	}
 
 }

@@ -121,8 +121,8 @@ public class DisplayMovieActivity extends ActionBarActivity {
 				moviesShowed.put(link, related);
 				link.setLayoutParams( new LayoutParams(LayoutParams.WRAP_CONTENT, 
 						LayoutParams.WRAP_CONTENT) );
-				link.setPadding(5, 1, 5, 1);
-				link.setBackgroundColor(0xFFFFFFFF);
+				//link.setPadding(5, 1, 5, 1);
+				link.setBackgroundColor(0x00000000);
 				relatedLayout.addView(link);
 				// add an action (browse the movie when clicked
 				link.setOnClickListener(new OnClickListener(){

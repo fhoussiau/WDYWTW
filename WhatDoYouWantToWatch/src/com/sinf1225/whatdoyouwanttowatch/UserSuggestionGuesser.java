@@ -3,6 +3,7 @@ package com.sinf1225.whatdoyouwanttowatch;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 /**
  * This class, heavily linked to Database, guesses the user's favorite genre, director and actor
@@ -19,15 +20,21 @@ public class UserSuggestionGuesser {
 	public static void initGuesser(Context context){
 		Database db = new Database( context );
 		SQLiteDatabase rdb = db.getReadableDatabase();
-		Cursor cur = rdb.rawQuery("SELECT G."+Database.GENRE_GENRE+")"+
-								" FROM TABLES "+Database.TABLE_INTEREST+" M, "+Database.TABLE_GENRE+" G "+
-								"WHERE M."+Database.INTEREST_MOVIE+" = "+Database.GENRE_MOVIE+" AND "+
-								"M."+Database.INTEREST_INTEREST+" >= ? ORDER BY COUNT(M."+Database.MOVIES_ID+") DESC LIMIT 1" , 
+		Cursor cur = rdb.rawQuery("SELECT "+Database.TABLE_GENRE+"."+Database.GENRE_GENRE+
+								" FROM "+Database.TABLE_INTEREST+", "+Database.TABLE_GENRE+
+								" WHERE "+Database.TABLE_INTEREST+"."+Database.INTEREST_MOVIE+" = "+
+								Database.TABLE_GENRE +"."+ Database.GENRE_MOVIE+" AND "+
+								Database.TABLE_INTEREST+"."+Database.INTEREST_INTEREST+" >= ? "+
+								" GROUP BY "+Database.TABLE_INTEREST+"."+Database.INTEREST_INTEREST+
+								" ORDER BY COUNT("+
+								Database.TABLE_INTEREST+"."+Database.INTEREST_MOVIE+") DESC LIMIT 1" , 
 							new String[] {Integer.toString(Interest.NOINTEREST.ordinal())} );
 		if(cur.getCount()>0 ){
+			cur.moveToFirst();
 			int genre = cur.getInt(0);
 			UserGenre = Genre.values()[ genre ];
 		}
+		Log.d("GUESSER", "Your favorite genre: "+UserGenre.toString());
 	}
 	
 	public static void wipeGuesser(){

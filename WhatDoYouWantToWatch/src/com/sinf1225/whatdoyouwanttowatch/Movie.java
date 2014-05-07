@@ -4,6 +4,7 @@ package com.sinf1225.whatdoyouwanttowatch;
 import java.util.Comparator;
 
 import android.content.Context;
+import android.util.Log;
 
 public class Movie implements Comparable<Movie> {
 
@@ -84,6 +85,7 @@ public class Movie implements Comparable<Movie> {
 		Database db = new Database( context );
 		MovieQuickData res = this.getQuickData(db);
 		db.close();
+		// return the quick data
 		return res;
 	}
 
@@ -93,6 +95,11 @@ public class Movie implements Comparable<Movie> {
 			return this.quickData;
 		}
 		quickData = db.getMovieQuickData(this);
+		// fill the movie's data from the quick data
+		this.title = quickData.title;
+		this.director = quickData.director;
+		this.year = quickData.year;
+		this.InterestForUser = quickData.interest;
 		return quickData;
 	}
 

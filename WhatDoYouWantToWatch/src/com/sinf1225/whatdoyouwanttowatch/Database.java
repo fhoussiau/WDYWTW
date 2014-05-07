@@ -12,7 +12,7 @@ public class Database extends SQLiteOpenHelper {
 
 	// constants for database handling
 	public static final String DATABASE_NAME = "WDYWTW.db";
-	public static final int DATABASE_VERSION = 8;
+	public static final int DATABASE_VERSION = 9;
 
 	// users table
 	public static final String TABLE_USERS = "users";
@@ -119,9 +119,9 @@ public class Database extends SQLiteOpenHelper {
 				MOVIES_ID + " TEXT NOT NULL PRIMARY KEY," +
 				MOVIES_NAME + " TEXT NOT NULL," +
 				MOVIES_DIRECTOR + " TEXT NOT NULL default 'Unknown', " +
-				MOVIES_DURATION + " INTEGER NOT NULL," + // minutes
+				MOVIES_DURATION + " INTEGER default -1," + // minutes
 				MOVIES_YEAR + " INTEGER NOT NULL," +
-				MOVIES_RATING + " FLOAT NOT NULL," +
+				MOVIES_RATING + " FLOAT default -1," +
 				MOVIES_DESCRIPTION + " TEXT default \"No description available\"," +
 				MOVIES_AGERESTR  + " INTEGER default -1);"
 				);
@@ -986,6 +986,7 @@ public class Database extends SQLiteOpenHelper {
 		if(cur.getCount() < 1){
 			return null;
 		}
+		cur.moveToFirst();
 		String title = cur.getString(0);
 		String director = cur.getString(1);
 		int year = cur.getInt(2);
@@ -993,10 +994,14 @@ public class Database extends SQLiteOpenHelper {
 		// get the interest 
 		Interest interest = Interest.NOINTEREST;
 		cur = db.rawQuery("SELECT "+INTEREST_INTEREST+" FROM "+TABLE_INTEREST+
-				" WHERE "+ TABLE_MOVIES + "= ?", new String[] {movie.getID()});
+				" WHERE "+ INTEREST_INTEREST + "= ?", new String[] {movie.getID()});
 		if(cur.getCount() > 0){
 			cur.moveToFirst();
 			interest = Interest.values()[ cur.getInt(0) ];
+			if(interest == null){
+				// cas d'erreur bizarre
+				interest = Interest.NOINTEREST;
+			}
 		}
 		// otherwise, build value
 		cur.moveToFirst();
@@ -1042,11 +1047,11 @@ public class Database extends SQLiteOpenHelper {
 		SQLiteDatabase dbw = this.getWritableDatabase();
 		if(alreadyExists){
 			dbw.execSQL("UPDATE "+TABLE_INTEREST+" SET "+INTEREST_INTEREST+
-					" = ? WHERE " +INTEREST_MOVIE+ " = ?;",
-					new String[] {Integer.toString(i), movie.getID()});
+					" = ? WHERE " +INTEREST_MOVIE+ " = ? AND "+INTEREST_USER+" = ? ;",
+					new String[] {Integer.toString(i), movie.getID(), Application.getUser().getName()});
 		}
 		else{
-			dbw.execSQL("INSERT INTO "+TABLE_INTEREST+" VALUES (?,?)",
+			dbw.execSQL("INSERT INTO "+TABLE_INTEREST+" VALUES (?,?,?)",
 					new String[] {movie.getID(), Application.getUser().getName(), Integer.toString(i)} );
 		}
 		dbw.close();
@@ -1126,7 +1131,6 @@ public class Database extends SQLiteOpenHelper {
 	}
 	
 	
-	// TODO: SORT_RESULTS
 	
 	/**
 	 * Returns n movies from a table
