@@ -880,6 +880,13 @@ public class Database extends SQLiteOpenHelper {
 
 
 	// movie part
+	
+	public boolean movieAlreadyExists( String imdbID ){
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cur = db.rawQuery("SELECT "+MOVIES_ID+" FROM "+TABLE_MOVIES+" WHERE "+
+				MOVIES_ID + " = ?", new String[] {imdbID});
+		return cur.getCount() > 1;
+	}
 
 	// fill the movie with data
 	public void fillMovie( Movie movie ){

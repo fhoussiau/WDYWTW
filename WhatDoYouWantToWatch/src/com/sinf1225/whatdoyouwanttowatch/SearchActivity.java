@@ -49,8 +49,20 @@ public class SearchActivity extends ListActivity {
 			// recuperer dans les preferences le nombre de films a chercher
 			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 			int toSearch = Integer.parseInt(pref.getString("pref_nsearch", "10"));
+			
+			// voir si l'utilisateur a autorise la recherche en ligne
+			boolean okSearchInternet = pref.getBoolean("pref_wifi", true);
+			boolean searchSucceeded = false;
+			if(okSearchInternet){
+				listM = InternetManager.getMoviesOnlineAsync(query, this);
+				if(listM != null){
+					searchSucceeded = true;
+				}
+			}
 			// Recherche dans la base de donnees
-			listM = db.Search_Movie(query, toSearch);
+			if(!searchSucceeded){
+				listM = db.Search_Movie(query, toSearch);
+			}
 
 			if(listM!=null && listM.size()> 0){
 				// Creation et initialisation de l'Adapter pour les personnes
