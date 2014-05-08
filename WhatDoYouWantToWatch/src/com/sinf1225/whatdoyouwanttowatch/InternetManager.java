@@ -33,6 +33,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 
 
@@ -78,14 +79,27 @@ public class InternetManager {
 		// first, check if there is wifi
 		if(CheckNet(context))
 		{
+			Log.e("YEK YEK", "reached...");
 			// if yes, build return Value
 			ArrayList<Movie> movieslist = new ArrayList<Movie>();
 			// Query on the URL
+			Log.e("YEK YEK", "reached...");
+			String Query = DATABASE_URL+name+"", FullUrl = "";
+			for(int i=0; i<Query.length(); i++){
+				if(Query.charAt(i) == ' '){
+					FullUrl += "%20";
+				}
+				else{
+					FullUrl += Query.charAt(i);
+				}
+			}
+			Log.e("YEK YEK YEK", Query+" >< "+FullUrl);
 			DefaultHttpClient   httpclient = new DefaultHttpClient(new BasicHttpParams());
-			HttpGet httppost = new HttpGet(DATABASE_URL+name+"");
+			HttpGet httppost = new HttpGet(FullUrl);
 			httppost.setHeader("Content-type", "application/json");
 			InputStream inputStream = null;
 			String result = null;
+			Log.e("YEK YEK", "reached...");
 			// Try and parse the results
 			try {
 				HttpResponse response = httpclient.execute(httppost);           
@@ -137,6 +151,7 @@ public class InternetManager {
 				}
 
 			} catch (Exception e) {
+				Log.e("YEK YEK", "ERROR");
 				// if an exception is caught here, then it was not handled and the program meant for us to intercept it
 				// the behaviour is to return null (empty list ==> error )
 				e.printStackTrace();
@@ -152,8 +167,10 @@ public class InternetManager {
 
 			return movieslist;
 		}
-		else
+		else{
+			Log.e("YEK YEK", "NO WIFI");
 			return null;
+		}
 	}
 
 
@@ -188,7 +205,16 @@ public class InternetManager {
 		
 		// else, fetch data from the omdbAPI website
 		DefaultHttpClient   httpclient = new DefaultHttpClient(new BasicHttpParams());
-		HttpPost httppost = new HttpPost(DATABASE_ID_URL+imdbID+"");
+		String Query = DATABASE_ID_URL+imdbID, FullUrl = "";
+		for(int i=0; i<Query.length(); i++){
+			if(Query.charAt(i) == ' '){
+				FullUrl += "%20";
+			}
+			else{
+				FullUrl += Query.charAt(i);
+			}
+		}
+		HttpGet httppost = new HttpGet(FullUrl);
 		httppost.setHeader("Content-type", "application/json");
 		InputStream inputStream = null;
 		String result = null;
@@ -279,8 +305,23 @@ public class InternetManager {
 	 * @param Rated the String
 	 * @return a String representing an integer (age)
 	 */
-	private static String fromRatedToAgeRestr( String Rated ){
-		return "12";
+	private static String fromRatedToAgeRestr( String rating ){
+		int ageRestrictions; 
+        if(rating.equals("N/A") || rating.equals("G")) 
+            ageRestrictions = 0; 
+        else if(rating.equals("PG")) 
+            ageRestrictions = 10; 
+        else if(rating.equals("PG-13")) 
+            ageRestrictions = 13; 
+        else if(rating.equals("Approved")) 
+            ageRestrictions = 15; 
+        else if(rating.equals("R")|| rating.equals("M")) 
+            ageRestrictions = 16; 
+        else if(rating.equals("NC-17") || rating.equals("X")) 
+            ageRestrictions = 18; 
+        else
+            ageRestrictions = 12; 
+        return Integer.toString(ageRestrictions); 
 	}
 	
 	private static Genre fromTextToGenre( String text ){
@@ -303,17 +344,10 @@ public class InternetManager {
 	 * @param context: the context initiating the query
 	 * @return a list of movies, null in case of error
 	 */
-	public static ArrayList<Movie> getMoviesOnlineAsync(String query, Context context){
+	public static AsyncTask<String, Void, ArrayList<Movie>> getMoviesOnlineAsync(String query, Context context){
 		lastContext = context;
-		AsyncTask<String, Void, ArrayList<Movie>> task = new OnlineQueryTask().execute(query);
-		try{
-			return task.get();
-		}
-		catch(Exception e){
-			return null;
-		}
-		finally{
-			lastContext = null;
-		}
+		return new OnlineQueryTask().execute(query);
 	}
+	
+
 }

@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.app.ListActivity;
 import android.app.SearchManager;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -27,6 +29,7 @@ public class SearchActivity extends ListActivity {
 	// liste des films affiches dans la liste
 	private ArrayList<Movie> listM;
 	private MovieAdapter adapter;
+	AsyncTask<String, Void, ArrayList<Movie>> taskQuery;
 	
 	// mode d'affichage des films (ordre d'affichage)
 	private int mode = 0; // 0:name, 1:year, 2:director
@@ -36,6 +39,7 @@ public class SearchActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
+		listM = new ArrayList<Movie>();
 
 		// Get the intent, verify the action and get the query
 		Intent intent = getIntent();
@@ -44,50 +48,42 @@ public class SearchActivity extends ListActivity {
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 					MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
 			suggestions.saveRecentQuery(query, null);
-			Database db = new Database( this );
-			
-			// recuperer dans les preferences le nombre de films a chercher
-			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-			int toSearch = Integer.parseInt(pref.getString("pref_nsearch", "10"));
 			
 			// voir si l'utilisateur a autorise la recherche en ligne
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 			boolean okSearchInternet = pref.getBoolean("pref_wifi", true);
 			boolean searchSucceeded = false;
+			
 			if(okSearchInternet){
-				listM = InternetManager.getMoviesOnlineAsync(query, this);
-				if(listM != null){
-					searchSucceeded = true;
-				}
+				fillDisplayInternet(query);
 			}
-			// Recherche dans la base de donnees
-			if(!searchSucceeded){
-				listM = db.Search_Movie(query, toSearch);
+			else{
+				fillDisplayDatabase(query);
 			}
 
+			// Creation et initialisation de l'Adapter pour les personnes
+			adapter = new MovieAdapter(this, listM);
+
+			//Recuperation du composant ListView
+			ListView list = (ListView)findViewById(android.R.id.list);
+
+			//Initialisation de la liste avec les donnees
+			list.setAdapter(adapter);
+
+			// ajout d'un listener a la liste
+			list.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+				@Override
+				public void onItemClick( AdapterView<?> Parent, View view, int pos, long id){
+					// affiche le film
+					Application.openMovie(view.getContext(), listM.get(pos).getID());
+				}
+			});
+			
+			if(okSearchInternet && !waitForTask()){
+				fillDisplayDatabase( query );
+			}
+			updateDisplay();
 			if(listM!=null && listM.size()> 0){
-				// Creation et initialisation de l'Adapter pour les personnes
-				adapter = new MovieAdapter(this, listM);
-
-				//Recuperation du composant ListView
-				ListView list = (ListView)findViewById(android.R.id.list);
-
-				//Initialisation de la liste avec les donnees
-				list.setAdapter(adapter);
-
-				// ajout d'un listener a la liste
-				list.setOnItemClickListener( new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick( AdapterView<?> Parent, View view, int pos, long id){
-						// affiche le film
-						Application.openMovie(view.getContext(), listM.get(pos).getID());
-					}
-				});
-				
-				// pour le tri, il faut s'assurer que tous les films ont ete rempli
-				for(Movie movie: listM){
-					movie.getQuickData(db);
-				}
-				
 				// populate the button
 				setButtonText();
 				sortEntries();
@@ -99,6 +95,56 @@ public class SearchActivity extends ListActivity {
 			}
 		}
 
+	}
+	
+	private void fillDisplayInternet(String query){
+		taskQuery = InternetManager.getMoviesOnlineAsync(query, this);
+	}
+	
+	private boolean waitForTask(){
+		Log.e("YEK YEK YEK", "wait task");
+		try{
+			ArrayList<Movie> movs = taskQuery.get();
+			if(movs!=null && !movs.isEmpty()){
+				if(listM!=null){
+					listM.addAll( movs );
+				}
+				else{
+					listM = movs;
+				}
+				return true;
+			}
+			return false;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			listM = null;
+			return false;
+		}
+	}
+	private void updateDisplay(){
+		// pour le tri, il faut s'assurer que tous les films ont ete rempli
+		for(Movie movie: listM){
+			Database db = new Database(this);
+			movie.getQuickData(db);
+		}
+		adapter.notifyDataSetChanged();
+	}
+	
+	private void fillDisplayDatabase(String query){
+		Database db = new Database( this );
+		// recuperer dans les preferences le nombre de films a chercher
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		int toSearch = Integer.parseInt(pref.getString("pref_nsearch", "10"));
+		ArrayList<Movie> movies = db.Search_Movie(query, toSearch);
+		if(movies != null){
+			if(listM == null){
+				listM = movies;
+			}
+			else{
+				listM.addAll( movies );
+			}
+		}
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
