@@ -37,7 +37,7 @@ public enum Interest {
 			case NOINTEREST: return 0xFFBBBBBB; // grey
 			case NOTWATCHED: return 0xFF556699; // blueish grey
 			case WILLNOTWATCHIT: return 0xFF660000; // dark red
-			case WANTTOWATCHIT: return 0xFFFFFF00; // yellow
+			case WANTTOWATCHIT: return 0x88EEFF00; // yellow
 			case HATED: return 0xFFFF0000; // red
 			case NOTLIKED: return 0xFFFF9900; // reddish orange
 			case INDIFFERENT: return 0xFF999999; // darker grey

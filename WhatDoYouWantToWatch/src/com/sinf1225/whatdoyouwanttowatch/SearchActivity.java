@@ -12,13 +12,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.app.ListActivity;
 import android.app.SearchManager;
-import android.util.Log;
 import android.view.Menu;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -27,9 +27,12 @@ import java.util.Collections;
 public class SearchActivity extends ListActivity {
 
 	// liste des films affiches dans la liste
-	private ArrayList<Movie> listM;
+	private ArrayList<Movie> listM = new ArrayList<Movie>();
 	private MovieAdapter adapter;
-	AsyncTask<String, Void, ArrayList<Movie>> taskQuery;
+	
+	// la requete de recherche sur Internet
+	AsyncTask<InternetTaskArgument, Movie, ArrayList<Movie>> taskQuery;
+	String query;
 	
 	// mode d'affichage des films (ordre d'affichage)
 	private int mode = 0; // 0:name, 1:year, 2:director
@@ -39,27 +42,14 @@ public class SearchActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
-		listM = new ArrayList<Movie>();
 
 		// Get the intent, verify the action and get the query
 		Intent intent = getIntent();
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
+			query = intent.getStringExtra(SearchManager.QUERY);
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 					MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
 			suggestions.saveRecentQuery(query, null);
-			
-			// voir si l'utilisateur a autorise la recherche en ligne
-			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-			boolean okSearchInternet = pref.getBoolean("pref_wifi", true);
-			boolean searchSucceeded = false;
-			
-			if(okSearchInternet){
-				fillDisplayInternet(query);
-			}
-			else{
-				fillDisplayDatabase(query);
-			}
 
 			// Creation et initialisation de l'Adapter pour les personnes
 			adapter = new MovieAdapter(this, listM);
@@ -78,57 +68,45 @@ public class SearchActivity extends ListActivity {
 					Application.openMovie(view.getContext(), listM.get(pos).getID());
 				}
 			});
+	
+			setButtonText();
 			
-			if(okSearchInternet && !waitForTask()){
-				fillDisplayDatabase( query );
-			}
-			updateDisplay();
-			if(listM!=null && listM.size()> 0){
-				// populate the button
-				setButtonText();
-				sortEntries();
+			// voir si l'utilisateur a autorise la recherche en ligne
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+			boolean okSearchInternet = pref.getBoolean("pref_wifi", true);
+			
+			if(okSearchInternet){
+				fillDisplayInternet(query);
 			}
 			else{
-				// No result found...
-				LinearLayout errorDisp = (LinearLayout) findViewById(R.id.related_container);
-				errorDisp.setVisibility(LinearLayout.VISIBLE);
+				fillDisplayDatabase(query);
 			}
+
 		}
 
 	}
 	
 	private void fillDisplayInternet(String query){
-		taskQuery = InternetManager.getMoviesOnlineAsync(query, this);
+		taskQuery = new InternetManager().execute( new InternetTaskArgument(this, query) );
 	}
 	
-	private boolean waitForTask(){
-		Log.e("YEK YEK YEK", "wait task");
-		try{
-			ArrayList<Movie> movs = taskQuery.get();
-			if(movs!=null && !movs.isEmpty()){
-				if(listM!=null){
-					listM.addAll( movs );
-				}
-				else{
-					listM = movs;
-				}
-				return true;
-			}
-			return false;
-		}
-		catch(Exception e){
-			e.printStackTrace();
-			listM = null;
-			return false;
-		}
+	
+	public void addMovie(Movie mov){
+		listM.add(mov);
+		updateDisplay();
 	}
-	private void updateDisplay(){
+	
+	public void updateDisplay(){
 		// pour le tri, il faut s'assurer que tous les films ont ete rempli
+		if(listM==null || listM.isEmpty()){
+			return;
+		}
+		listM.removeAll(Collections.singleton(null));
+		Database db = new Database(this);
 		for(Movie movie: listM){
-			Database db = new Database(this);
 			movie.getQuickData(db);
 		}
-		adapter.notifyDataSetChanged();
+		sortEntries();
 	}
 	
 	private void fillDisplayDatabase(String query){
@@ -136,15 +114,42 @@ public class SearchActivity extends ListActivity {
 		// recuperer dans les preferences le nombre de films a chercher
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		int toSearch = Integer.parseInt(pref.getString("pref_nsearch", "10"));
-		ArrayList<Movie> movies = db.Search_Movie(query, toSearch);
-		if(movies != null){
-			if(listM == null){
-				listM = movies;
-			}
-			else{
-				listM.addAll( movies );
+		listM.addAll(db.Search_Movie(query, toSearch));
+		if(listM == null || listM.isEmpty()){
+			LinearLayout errorDisp = (LinearLayout) findViewById(R.id.related_container);
+			errorDisp.setVisibility(LinearLayout.VISIBLE);
+		}
+		else{
+			updateDisplay();
+		}
+	}
+	
+	public void notifyLoading(){
+		notifyText("Loading...");
+	}
+	
+	public void notifyDone(){
+		notifyText("No result found...");
+		LinearLayout errorDisp = (LinearLayout) findViewById(R.id.related_container);
+		errorDisp.setVisibility(LinearLayout.GONE);
+		// checker la valeur de retour
+		try{
+			ArrayList<Movie> results = taskQuery.get();
+			if(results == null || results.isEmpty()){
+				fillDisplayDatabase( query );
 			}
 		}
+		catch(Exception e){
+			fillDisplayDatabase( query );
+		}
+		
+	}
+	
+	private void notifyText(String text){
+		LinearLayout errorDisp = (LinearLayout) findViewById(R.id.related_container);
+		errorDisp.setVisibility(LinearLayout.VISIBLE);
+		TextView notifier = (TextView) findViewById(R.id.text_notifier);
+		notifier.setText(text);
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -193,6 +198,9 @@ public class SearchActivity extends ListActivity {
 	 * Sort the entries in the movies' list
 	 */
 	private void sortEntries(){
+		if(listM==null || listM.isEmpty()){
+			return;
+		}
 		switch(mode){
 		case 0: // name
 			Collections.sort( listM, Movie.MovieTitleComparator );

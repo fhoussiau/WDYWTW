@@ -33,16 +33,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 
 
-public class InternetManager {
+public class InternetManager extends AsyncTask<InternetTaskArgument, Movie, ArrayList<Movie>> {
 
+	// static part
 	public static String DATABASE_URL = "http://www.omdbapi.com/?s=";
 	public static String DATABASE_ID_URL = "http://www.omdbapi.com/?i=";
 
-	//CheckNet seems to be ok
 	public static boolean CheckNet(Context context){
 		ConnectivityManager cm = (ConnectivityManager)
 				context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -52,21 +51,27 @@ public class InternetManager {
 		}
 		return false;
 	}
+	
+	
+	
+	
+	// object part
+	SearchActivity context;
+	
+	protected void onPreExecute(){
+		
+	}
+
+    protected void onProgressUpdate(Movie... movies){
+        context.addMovie(movies[0]);
+    }
+    
+    protected void onPostExecute(ArrayList<Movie> result){
+    	context.notifyDone();
+    }
 
 
-	/*
-	 * Shcéma Fonctionnel:
-	 * 
-	 * ArrayList<Movie> GetQuery(String name, Context context)
-	 * 	CheckNet();
-	 * 	Request url();
-	 * 	Parse Json();
-	 * 	Make ArrayList();
-	 * 	for each imdbID found
-	 * 		Add FillMovie(imdbID) to ArrayList;
-	 * 	return ArrayList;
-	 * end of GetQuery
-	 */
+
 
 	/**
 	 * Get movies online, from the OMDBapi website, online. This downloads movies in the Database
@@ -75,15 +80,18 @@ public class InternetManager {
 	 * @param context: the context initiating the request
 	 * @return a list of movies, possibly empty, filled in the Database. Null will be returned if an exception occurs.
 	 */
-	public static ArrayList<Movie> GetMoviesOnline(String name, Context context){
+	
+    @Override
+	protected ArrayList<Movie> doInBackground(InternetTaskArgument...  args) {
 		// first, check if there is wifi
+    	context = args[0].context;
+    	String name = args[0].query;
+    	context.notifyLoading();
 		if(CheckNet(context))
 		{
-			Log.e("YEK YEK", "reached...");
 			// if yes, build return Value
 			ArrayList<Movie> movieslist = new ArrayList<Movie>();
 			// Query on the URL
-			Log.e("YEK YEK", "reached...");
 			String Query = DATABASE_URL+name+"", FullUrl = "";
 			for(int i=0; i<Query.length(); i++){
 				if(Query.charAt(i) == ' '){
@@ -93,13 +101,11 @@ public class InternetManager {
 					FullUrl += Query.charAt(i);
 				}
 			}
-			Log.e("YEK YEK YEK", Query+" >< "+FullUrl);
 			DefaultHttpClient   httpclient = new DefaultHttpClient(new BasicHttpParams());
 			HttpGet httppost = new HttpGet(FullUrl);
 			httppost.setHeader("Content-type", "application/json");
 			InputStream inputStream = null;
 			String result = null;
-			Log.e("YEK YEK", "reached...");
 			// Try and parse the results
 			try {
 				HttpResponse response = httpclient.execute(httppost);           
@@ -141,6 +147,7 @@ public class InternetManager {
 							Movie mov = FillMovie(oneObject.getString("imdbID"), context);
 							if(mov != null){
 								movieslist.add(mov);
+								this.publishProgress( new Movie[] {mov} );
 							}
 						}
 					} catch (JSONException e) {
@@ -151,7 +158,6 @@ public class InternetManager {
 				}
 
 			} catch (Exception e) {
-				Log.e("YEK YEK", "ERROR");
 				// if an exception is caught here, then it was not handled and the program meant for us to intercept it
 				// the behaviour is to return null (empty list ==> error )
 				e.printStackTrace();
@@ -168,27 +174,15 @@ public class InternetManager {
 			return movieslist;
 		}
 		else{
-			Log.e("YEK YEK", "NO WIFI");
 			return null;
 		}
 	}
 
+	
+	
 
-	/*Schéma Fonctionnel:
-	 * 
-	 * Movie FillMovie(String imdbID, Context context)
-	 * 	New Movie();
-	 * 	Request url();
-	 * 	Parse Json();
-	 * 	FillDatabase (! Instancier la Database ?)
-	 * 				 (! New Database ?)
-	 * 				 (! Database.TableMovies ?)
-	 * 	application.getMovie(imdbID);
-	 * 	movie.fillData(context);
-	 * 	return movie;
-	 * end of FillMovie
-	 */
-
+	
+	// not changed
 	/**
 	 * Fill a movie from the OMDBapi into the Database
 	 * @param imdbID: the ID of the movie to fill (extracted from the database)
@@ -300,6 +294,8 @@ public class InternetManager {
 		}
 	}
 	
+	
+	// utilities
 	/**
 	 * Transform a rated symbol into an age restriction (an integer into a string)
 	 * @param Rated the String
@@ -335,19 +331,5 @@ public class InternetManager {
 			return null;
 		}
 	}
-	
-	public static Context lastContext;
-	
-	/**
-	 * Get movie online asynchronously, so that it can start on main thread
-	 * @param query: the query
-	 * @param context: the context initiating the query
-	 * @return a list of movies, null in case of error
-	 */
-	public static AsyncTask<String, Void, ArrayList<Movie>> getMoviesOnlineAsync(String query, Context context){
-		lastContext = context;
-		return new OnlineQueryTask().execute(query);
-	}
-	
 
 }
