@@ -110,7 +110,11 @@ public class DisplayMovieActivity extends ActionBarActivity {
 		interest_tv.setText(movie.InterestForUser.toString());
 		interest_tv.setTextColor(movie.InterestForUser.toColor());
 		// set age restriction and color accordingly
-		rating_tv.setText("Age Restriction: "+Integer.toString(movie.ageRestrictions));
+		String ageRestr = Integer.toString(movie.ageRestrictions);
+		if(movie.ageRestrictions<1){
+			ageRestr = "None";
+		}
+		rating_tv.setText("Age Restriction: "+ageRestr);
 		if( Application.getUser().getAge() < movie.ageRestrictions ){
 			// in red if you are too young!
 			rating_tv.setTextColor(0xFFFF0000);
@@ -130,7 +134,11 @@ public class DisplayMovieActivity extends ActionBarActivity {
 			LinearLayout castLayout = (LinearLayout) findViewById(R.id.cast_container);
 			for(int i=0; i<MAX_CAST && i< movie.Cast.length; i++){
 				String[] castmember = movie.Cast[i];
-				addEntry(castLayout, castmember[1]+" ("+castmember[0]+")");
+				if( castmember[1].equals("N/A")){
+					addEntry(castLayout, castmember[0]);
+				}else{
+					addEntry(castLayout, castmember[0]+" ("+castmember[1]+")");
+				}
 			}
 		}
 		// now, populate entries for genre and related movies
@@ -141,7 +149,7 @@ public class DisplayMovieActivity extends ActionBarActivity {
 			}
 		}
 		// finally, populate with movies (a bit different)
-		if(movie.RelatedMovies != null){
+		if(movie.RelatedMovies != null && movie.RelatedMovies.length > 0){
 			LinearLayout relatedLayout = (LinearLayout) findViewById(R.id.related_container);
 			moviesShowed = new Hashtable<View, Movie>();
 			for(Movie related: movie.RelatedMovies){
@@ -173,7 +181,12 @@ public class DisplayMovieActivity extends ActionBarActivity {
 					}
 				});
 			}
-		}		
+		}	
+		else{
+			// do not display the related movies entry
+			LinearLayout relatedLayout = (LinearLayout) findViewById(R.id.related_container);
+			relatedLayout.setVisibility(LinearLayout.GONE);
+		}
 	} // end of DisplaySuccess
 	
 	
